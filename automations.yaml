@@ -1,0 +1,183 @@
+- id: '1695170301853'
+  alias: Shopping List Reminder
+  description: ''
+  trigger:
+  - platform: state
+    entity_id: person.sammy_hillzere
+    from: not_home
+    to: shopping
+    for:
+      minutes: 3
+  - platform: state
+    entity_id: person.sammy_hillzere
+    from: not_home
+    to: shopping_2
+    for:
+      minutes: 3
+  - platform: state
+    entity_id: person.sammy_hillzere
+    from: not_home
+    to: shopping_3
+    for:
+      minutes: 3
+  - platform: state
+    entity_id: person.sammy_hillzere
+    from: not_home
+    to: shopping_4
+    for:
+      minutes: 3
+  - platform: state
+    entity_id: person.sammy_hillzere
+    from: not_home
+    to: shopping_5
+    for:
+      minutes: 3
+  - platform: state
+    entity_id: person.sammy_hillzere
+    from: not_home
+    to: shopping_7
+    for:
+      minutes: 3
+  - platform: state
+    entity_id: person.thomas_hillzere
+    from: not_home
+    to: shopping
+    for:
+      minutes: 3
+  - platform: state
+    entity_id: person.thomas_hillzere
+    from: not_home
+    to: shopping_2
+    for:
+      minutes: 3
+  - platform: state
+    entity_id: person.thomas_hillzere
+    from: not_home
+    to: shopping_3
+    for:
+      minutes: 3
+  - platform: state
+    entity_id: person.thomas_hillzere
+    from: not_home
+    to: shopping_4
+    for:
+      minutes: 3
+  - platform: state
+    entity_id: person.thomas_hillzere
+    from: not_home
+    to: shopping_5
+    for:
+      minutes: 3
+  - platform: state
+    entity_id: person.thomas_hillzere
+    from: not_home
+    to: shopping_7
+    for:
+      minutes: 3
+  action:
+  - service: notify.phones
+    data:
+      message: Would you like to open your shopping list?
+      data:
+        clickAction: /dashboard-mushroom/shopping-list
+        url: /dashboard-mushroom/shopping-list
+  mode: single
+- id: '1695353672098'
+  alias: Lock Car
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - lock.2021_cx_30_2_5_s_pf_awd_lock
+    to: unlocked
+    from:
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+  condition: []
+  action:
+  - service: lock.lock
+    data: {}
+    target:
+      entity_id: lock.2021_cx_30_2_5_s_pf_awd_lock
+  mode: single
+- id: '1695532602218'
+  alias: Backup Home Assistant every night at 3 AM
+  description: ''
+  trigger:
+    platform: time
+    at: 03:00:00
+  action:
+    alias: Create backup now
+    service: backup.create
+- id: '1695618046786'
+  alias: Flash lights when pearl leaves
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - device_tracker.pearl_tracker
+    - person.pearl
+    to: not_home
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 30
+    from:
+  condition: []
+  action:
+  - service: light.turn_on
+    data:
+      color_name: red
+    target:
+      area_id:
+      - bedroom
+      - dining_room
+      - kitchen
+      - living_room
+      - office
+  mode: single
+- id: '1695678861300'
+  alias: Turn on Office Lights when Thomas in office
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.thomas_s_apple_watch
+    to: office
+    for:
+      hours: 0
+      minutes: 3
+      seconds: 0
+    from:
+  condition: []
+  action:
+  - service: light.turn_on
+    data: {}
+    target:
+      device_id:
+      - f1ff0089d144ef35365631feefde6b14
+      - b711813430b9074769ee1d0cb1eb7b3f
+  mode: single
+- id: '1695690186251'
+  alias: Turn on bedside lamps when Thomas goes in
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.thomas_s_apple_watch
+    to: bedroom
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    from:
+  condition: []
+  action:
+  - service: light.turn_on
+    data:
+      brightness_pct: 40
+    target:
+      device_id: 1daf783c11b0ec08d378d5f92d6ce905
+  mode: single

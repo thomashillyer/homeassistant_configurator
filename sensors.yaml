@@ -1,0 +1,12 @@
+- platform: mqtt_room
+  name: "Thomas's Apple Watch"
+  device_id: !secret ble_ThomasWatchIRK
+  state_topic: "espresense/rooms"
+  timeout: 5
+  away_timeout: 120
+- platform: mqtt_room
+  name: Pearl
+  device_id: !secret ble_Pearl
+  state_topic: "espresense/rooms"
+  timeout: 5
+  away_timeout: 120
