@@ -50,9 +50,9 @@ panel_iframe:
     icon: mdi:docker
     require_admin: true
   configurator:
-    title: "Configurator"
-    url: "https://config.hillzere.com"
-    icon: mdi:cog
+    title: "VSCode"
+    url: "https://code.hillzere.com"
+    icon: mdi:microsoft-visual-studio-code
     require_admin: true
 
 # webhook should be working now
