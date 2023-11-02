@@ -1,0 +1,225 @@
+'1696880284623':
+  alias: Notify Devices
+  description: Send notification to key devices
+  fields:
+    message:
+      description: Message content of the notification.
+      required: true
+      selector:
+        text:
+      example: Notifications are awesome
+    title:
+      description: Subject of the message
+      required: true
+      selector:
+        text:
+      example: Status Report
+    persistant:
+      description: Send a Persistant Notification
+      required: true
+      default: false
+      selector:
+        boolean:
+      example: 'True'
+    email:
+      description: Send an E-mail
+      required: true
+      default: false
+      selector:
+        boolean:
+      example: 'True'
+    mobile:
+      description: Send Mobile Notification
+      required: true
+      default: false
+      selector:
+        boolean:
+      example: 'True'
+    url:
+      description: Page to open in Home Assistant App
+      default: false
+      selector:
+        text:
+      example: /lovelace-appliances/thermostat
+    emergency:
+      description: Notify even if the device is in DND Mode.
+      required: true
+      default: false
+      selector:
+        boolean:
+      example: 'False'
+    notify_alexa:
+      description: Notify Alexa Devices
+      required: true
+      default: false
+      selector:
+        boolean:
+      example: 'False'
+    alexa_entities:
+      description: List of Alexa Players to notify
+      selector:
+        target:
+          entity:
+            domain: media_player
+      example: media_player.kitchen
+    notify_google_home:
+      description: Notify Google Home Devices
+      required: true
+      default: false
+      selector:
+        boolean:
+      example: 'False'
+    entities:
+      description: List of Google Homes to notify
+      selector:
+        target:
+          entity:
+            domain: media_player
+      example: media_player.bathroom_speaker
+    log:
+      description: Add entry to Log
+      required: true
+      default: false
+      selector:
+        boolean:
+      example: 'True'
+  sequence:
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ notify_alexa }}'
+      sequence:
+      - service: notify.alexa_media
+        continue_on_error: true
+        data:
+          title: '{{ title }}'
+          message: '{{ message }}'
+          target: '{{ alexa_entities.get("entity_id") }}'
+          data:
+            type: announce
+            method: all
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ persistant }}'
+      sequence:
+      - service: notify.persistent_notification
+        continue_on_error: true
+        data:
+          title: '{{ title }}'
+          message: '{{ message }}'
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ email }}'
+      sequence:
+      - service: notify.email
+        continue_on_error: true
+        data:
+          title: 'HA: {{ title }}'
+          message: '{{ message }}'
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ mobile }}'
+      sequence:
+      - if:
+        - condition: template
+          value_template: '{{ emergency }}'
+        then:
+        - if:
+          - condition: template
+            value_template: '{{ url != false }}'
+          then:
+          - service: notify.mobile_app_iphone
+            continue_on_error: true
+            data:
+              title: '{{ title }}'
+              message: '{{ message }}'
+              data:
+                push:
+                  sound:
+                    name: default
+                    critical: 1
+                    volume: 1
+                url: '{{ url }}'
+                clickAction: '{{ url }}'
+          else:
+          - service: notify.mobile_app_iphone
+            continue_on_error: true
+            data:
+              title: '{{ title }}'
+              message: '{{ message }}'
+              data:
+                push:
+                  sound:
+                    name: default
+                    critical: 1
+                    volume: 1
+        else:
+        - if:
+          - condition: template
+            value_template: '{{ url != false }}'
+          then:
+          - service: notify.mobile_app_iphone
+            continue_on_error: true
+            data:
+              title: '{{ title }}'
+              message: '{{ message }}'
+              data:
+                url: '{{ url }}'
+                clickAction: '{{ url }}'
+          else:
+          - service: notify.mobile_app_iphone
+            continue_on_error: true
+            data:
+              title: '{{ title }}'
+              message: '{{ message }}'
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ log }}'
+      sequence:
+      - service: system_log.write
+        continue_on_error: true
+        data:
+          message: '{{ title }} - {{ message }}'
+  - choose:
+    - conditions:
+      - condition: template
+        value_template: '{{ notify_google_home }}'
+      sequence:
+      - service: tts.speak
+        data:
+          cache: true
+          media_player_entity_id: media_player.dining_room_speaker
+          message: '{{ title | replace(" ", "+") }} + {{ message | replace(" ", "+")
+            }}'
+        target:
+          entity_id: tts.google_en_com
+      - service: media_player.play_media
+        continue_on_error: true
+        target:
+          entity_id: '''{{ entities.get("entity_id") }}''
+
+            '
+        data:
+          media_content_id: media-source://tts/googleu_translate?message="{{ title
+            | replace(" ", "+") }} + {{ message | replace(" ", "+") }}"
+          media_content_type: provider
+        metadata:
+          title: 'Back Door is open '
+          thumbnail: https://brands.home-assistant.io/_/google_translate/logo.png
+          media_class: app
+          children_media_class:
+          navigateIds:
+          - {}
+          - media_content_type: app
+            media_content_id: media-source://tts
+          - media_content_type: provider
+            media_content_id: media-source://tts/google_translate?message="{{ title
+              | replace(" ", "+") }}+{{ message | replace(" ", "+") }}"
+        enabled: false
+  mode: parallel
+  icon: mdi:bulletin-board
+  max: 5

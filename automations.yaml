@@ -157,8 +157,8 @@
     data: {}
     target:
       device_id:
-      - f1ff0089d144ef35365631feefde6b14
-      - b711813430b9074769ee1d0cb1eb7b3f
+      - a1fe2fa603e5abc155131f0988897055
+      - d8a66aaaceeee3b3e22d002da328d5e9
   mode: single
 - id: '1695690186251'
   alias: Turn on bedside lamps when Thomas goes in
@@ -179,5 +179,180 @@
     data:
       brightness_pct: 40
     target:
-      device_id: 1daf783c11b0ec08d378d5f92d6ce905
+      device_id: 09c18196b5b157f9dc4ce3b2902e7779
+  mode: single
+- id: '1697407831421'
+  alias: Pearl Watch
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.pearl
+    from: backyard
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 20
+    to: not_home
+  condition:
+  - condition: or
+    conditions:
+    - condition: state
+      entity_id: input_boolean.pearl_watch_on
+      state: 'on'
+    - condition: state
+      entity_id: binary_sensor.lumi_lumi_sensor_magnet_aq2_opening
+      state: 'on'
+  action:
+  - service: script.1696880284623
+    data:
+      persistant: true
+      email: false
+      mobile: true
+      emergency: true
+      notify_alexa: false
+      notify_google_home: true
+      log: false
+      message: Pearl has escaped!
+      entities:
+        entity_id:
+        - media_player.dining_room_speaker
+        - media_player.kitchen_display
+  mode: single
+- id: '1697826912190'
+  alias: button to turn Pearl Watch on
+  description: ''
+  trigger:
+  - device_id: 202d73f1233fa556fb983bf26b5b7409
+    domain: zha
+    platform: device
+    type: remote_button_short_press
+    subtype: button
+  condition: []
+  action:
+  - service: input_boolean.toggle
+    data: {}
+    target:
+      entity_id: input_boolean.pearl_watch_on
+  mode: single
+- id: '1697827163891'
+  alias: Basement Door Open turns on Pearl Watch
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.lumi_lumi_sensor_magnet_aq2_opening
+    to: 'on'
+  condition: []
+  action:
+  - service: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.pearl_watch_on
+  mode: single
+- id: '1697827522422'
+  alias: Notify Pearl Watch On
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - input_boolean.pearl_watch_on
+    from: 'off'
+    to: 'on'
+    id: to_on
+  - platform: state
+    entity_id:
+    - input_boolean.pearl_watch_on
+    from: 'on'
+    to: 'off'
+    id: to_off
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - to_on
+      sequence:
+      - service: script.1696880284623
+        data:
+          persistant: false
+          email: false
+          mobile: true
+          emergency: false
+          notify_alexa: false
+          notify_google_home: true
+          log: false
+          message: Pearl Watch On!
+          entities:
+            entity_id:
+            - media_player.dining_room_speaker
+            - media_player.kitchen_display
+    - conditions:
+      - condition: trigger
+        id:
+        - to_off
+      sequence:
+      - service: script.1696880284623
+        data:
+          persistant: false
+          email: false
+          mobile: true
+          emergency: false
+          notify_alexa: false
+          notify_google_home: true
+          log: false
+          message: Pearl Watch Off!
+          entities:
+            entity_id:
+            - media_player.dining_room_speaker
+            - media_player.kitchen_display
+  mode: single
+- id: '1697998501943'
+  alias: Turn off HVAC when door or windows are open
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.house_sealed
+    from: 'off'
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 3
+      seconds: 0
+    id: Open
+  - platform: state
+    entity_id:
+    - binary_sensor.house_sealed
+    from: 'on'
+    to: 'off'
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+    id: Closed
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - Open
+      sequence:
+      - service: climate.set_hvac_mode
+        data:
+          hvac_mode: 'off'
+        target:
+          entity_id: climate.main_unit
+    - conditions:
+      - condition: trigger
+        id:
+        - Closed
+      sequence:
+      - service: climate.set_hvac_mode
+        data:
+          hvac_mode: auto
+        target:
+          entity_id: climate.main_unit
   mode: single

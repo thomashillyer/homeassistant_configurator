@@ -27,8 +27,13 @@ logger:
     custom_components.scrypted: debug
 
 http:
-  ssl_certificate: /config/letsencrypt/live/hillzere.com/fullchain.pem
-  ssl_key: /config/letsencrypt/live/hillzere.com/privkey.pem
+#  ssl_certificate: /config/letsencrypt/live/hillzere.com/fullchain.pem
+#  ssl_key: /config/letsencrypt/live/hillzere.com/privkey.pem
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 10.0.10.1
+    - 10.0.1.1
+    - 10.0.10.3
 
 google_assistant:
   project_id: inspired-gear-368219
@@ -41,7 +46,7 @@ device_tracker:
 panel_iframe:
   portainer:
     title: "Portainer"
-    url: "https://home.hillzere.com:9443/#!/2/docker/containers"
+    url: "https://portainer.hillzere.com/#!/2/docker/containers"
     icon: mdi:docker
     require_admin: true
   configurator:
