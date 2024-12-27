@@ -10,3 +10,10 @@
   state_topic: "espresense/rooms"
   timeout: 5
   away_timeout: 120
+
+- platform: rest
+  resource: https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=YOUR_CHANNEL_ID&eventType=live&type=video&key=KEY_API
+  method: GET
+  value_template: '{{ (value_json["items"][0].id.videoId | string) }}'
+  name: "youtube"
+  scan_interval: 100
