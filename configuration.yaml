@@ -43,16 +43,4 @@ google_assistant:
 device_tracker:
   - platform: bluetooth_le_tracker
 
-panel_iframe:
-  portainer:
-    title: "Portainer"
-    url: "https://portainer.hillzere.com/#!/2/docker/containers"
-    icon: mdi:docker
-    require_admin: true
-  configurator:
-    title: "VSCode"
-    url: "https://code.hillzere.com"
-    icon: mdi:microsoft-visual-studio-code
-    require_admin: true
-
 # webhook should be working now
