@@ -206,7 +206,7 @@
   action:
   - service: script.1696880284623
     data:
-      persistant: true
+      persistant: false
       email: false
       mobile: true
       emergency: true
@@ -349,10 +349,264 @@
       - condition: trigger
         id:
         - Closed
+      - condition: not
+        conditions:
+        - condition: state
+          entity_id: climate.main_unit
+          state: 'off'
       sequence:
       - service: climate.set_hvac_mode
         data:
-          hvac_mode: auto
+          hvac_mode: heat_cool
         target:
           entity_id: climate.main_unit
+  mode: single
+- id: '1700082051818'
+  alias: All office lights act as one switch
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.office_dimmer_light
+    from: 'on'
+    id: 'On'
+  - platform: state
+    entity_id:
+    - light.office_dimmer_light
+    from: 'off'
+    id: 'Off'
+  condition:
+  - condition: time
+    after: 08:00:00
+    before: '19:00:00'
+    weekday:
+    - sun
+    - mon
+    - tue
+    - wed
+    - thu
+    - fri
+    - sat
+  action:
+  - if:
+    - condition: trigger
+      id:
+      - 'On'
+    then:
+    - service: light.turn_on
+      data: {}
+      target:
+        entity_id: light.all_office_lights
+    else:
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id: light.all_office_lights
+  mode: single
+- id: '1700980232130'
+  alias: Update Cat Litter Counter
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.lumi_lumi_vibration_aq1_vibration
+    - binary_sensor.vibration_two_vibration_2
+    to: 'on'
+    from: 'off'
+    id: pooped
+  - platform: state
+    entity_id:
+    - binary_sensor.lumi_lumi_vibration_aq1_vibration
+    - binary_sensor.vibration_two_vibration_2
+    to: 'on'
+    from: 'off'
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: scooped
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - pooped
+      sequence:
+      - service: counter.increment
+        data: {}
+        target:
+          entity_id: counter.cat_litter_counter
+    - conditions:
+      - condition: trigger
+        id:
+        - scooped
+      sequence:
+      - service: counter.reset
+        data: {}
+        target:
+          entity_id: counter.cat_litter_counter
+      - service: input_select.select_option
+        data:
+          option: Clean
+        target:
+          entity_id: input_select.litter_status
+  mode: single
+- id: '1700980376992'
+  alias: Notify Scoop Cat Litter
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id:
+    - counter.cat_litter_counter
+    above: 5
+  condition: []
+  action:
+  - service: notify.phones
+    data:
+      message: Scoop Cat Litter
+  - service: input_select.select_option
+    data:
+      option: Needs Scooping
+    target:
+      entity_id: input_select.litter_status
+  mode: single
+- id: '1708205264830'
+  alias: Low Battery Notifications & Actions
+  description: ''
+  use_blueprint:
+    path: Blackshome/low-battery-notifications-and-actions.yaml
+    input:
+      include_time: time_enabled
+      time: '17:00:00'
+      weekday_options:
+      - sun
+      exclude_sensors:
+        entity_id:
+        - sensor.iphone_battery_level
+        - sensor.sammy_ozeres_iphone_battery_level
+        - sensor.roborock_q7_max_battery
+      notify_device:
+      - 1f1ec731bdae5cbaccb7b94a7eccb659
+      include_easy_notify: enable_easy_notify
+- id: '1713654864639'
+  alias: Turn on bedside lamps at night
+  description: ''
+  trigger:
+  - platform: sun
+    event: sunset
+    offset: '-30'
+  condition:
+  - condition: or
+    conditions:
+    - condition: zone
+      entity_id: person.sammy_hillzere
+      zone: zone.home
+    - condition: zone
+      entity_id: person.thomas_hillzere
+      zone: zone.home
+  action:
+  - type: turn_on
+    device_id: 44a8e7936f830f6d0039db68b7ff36e3
+    entity_id: db01e91da6a82110279b1ecc55536f4c
+    domain: light
+    brightness_pct: 55
+  - type: turn_on
+    device_id: 96a097cab3b948ba8f9e537a658df3a0
+    entity_id: 97a29104142dd340a6ae62a38b3d3168
+    domain: light
+    brightness_pct: 55
+  mode: single
+- id: '1718082107100'
+  alias: speak
+  description: ''
+  trigger: []
+  condition: []
+  action:
+  - service: script.1696880284623
+    metadata: {}
+    data:
+      persistant: false
+      email: false
+      mobile: true
+      emergency: true
+      notify_alexa: false
+      notify_google_home: true
+      log: false
+      message: 'What is fresh pasta '
+      entities:
+        device_id:
+        - 3369a38281f17feda957b655753a0c0d
+        - d34774d32757bba7474d23786a467ec3
+        - 4f70d65b9350c73cf03c3d3fd8a9987d
+  mode: single
+- id: '1722319978153'
+  alias: Bedroom Air Purifier
+  description: ''
+  trigger:
+  - platform: time
+    at: '22:30:00'
+    id: Evening
+  - platform: time
+    at: 07:00:00
+    id: Early_morning
+  - platform: time
+    at: 09:00:00
+    id: Morning
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - Evening
+      sequence:
+      - service: fan.set_preset_mode
+        metadata: {}
+        data:
+          preset_mode: sleep
+        target:
+          entity_id: fan.bedroom_airy
+    - conditions:
+      - condition: trigger
+        id:
+        - Morning
+      sequence:
+      - service: fan.set_percentage
+        metadata: {}
+        data:
+          percentage: 66
+        target:
+          entity_id: fan.bedroom_airy
+    - conditions:
+      - condition: trigger
+        id:
+        - Early_morning
+      sequence:
+      - service: fan.set_percentage
+        metadata: {}
+        data:
+          percentage: 33
+        target:
+          entity_id: fan.bedroom_airy
+  mode: single
+- id: '1722320281817'
+  alias: Keep HVAC off if house is unsealed
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - climate.main_unit
+    from: 'off'
+  condition:
+  - condition: state
+    entity_id: binary_sensor.house_sealed
+    state: 'on'
+  action:
+  - service: climate.set_hvac_mode
+    metadata: {}
+    data:
+      hvac_mode: 'off'
+    target:
+      device_id: a0bb2fd76b12ab3d3ab2cfd1d0c256dc
   mode: single
